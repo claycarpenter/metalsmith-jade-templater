@@ -19,12 +19,8 @@ function jadeTemplater (baseTemplatesDir) {
                 return;
             }
             
-            console.log('Setting basedir:', baseTemplatesDir);
-            
             // Resolve the relative template file path to an absolute path.
             var templateFilePath = path.resolve(baseTemplatesDir + '/' + file.template);
-            
-            console.log('Resolved templateFilePath:', templateFilePath);
             
             var templateReadPromise = fs_readFile(templateFilePath, 'utf8');
             templateReadPromise
