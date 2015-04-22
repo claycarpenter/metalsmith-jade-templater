@@ -5,7 +5,7 @@ var jade = require('jade'),
     fs = require('fs'),
     Q = require('q');
 
-function jadeTemplater () {
+function jadeTemplater (baseTemplatesDir) {
     var fs_readFile = Q.denodeify(fs.readFile);
     
     return function (files, metalsmith, done) {
@@ -19,17 +19,29 @@ function jadeTemplater () {
                 return;
             }
             
+            console.log('Setting basedir:', baseTemplatesDir);
+            
             // Resolve the relative template file path to an absolute path.
-            var templateFilePath = path.resolve(file.template);
+            var templateFilePath = path.resolve(baseTemplatesDir + '/' + file.template);
+            
+            console.log('Resolved templateFilePath:', templateFilePath);
             
             var templateReadPromise = fs_readFile(templateFilePath, 'utf8');
             templateReadPromise
                 .then(function (fileBuffer) {
                     var templateContents = fileBuffer.toString();
                     
-                    var templateFn = jade.compile(templateContents, {pretty: true, filename: filename});
+                    var jadeCompileOptions = {
+                        pretty: true, 
+                        filename: filename, 
+                        basedir: baseTemplatesDir
+                    };
+                    
+                    var templateFn = jade.compile(templateContents, jadeCompileOptions);
+                    
                     var locals = Object.create(null);
                     locals.data = file;
+                    
                     var htmlOutput = templateFn(locals);
                     
                     file.contents = new Buffer(htmlOutput);
