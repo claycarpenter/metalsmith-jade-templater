@@ -5,8 +5,11 @@ var jade = require('jade'),
     fs = require('fs'),
     Q = require('q');
 
-function jadeTemplater (baseTemplatesDir) {
+function jadeTemplater (options) {
     var fs_readFile = Q.denodeify(fs.readFile);
+    
+    // TODO: This should have a default value.
+    var baseTemplatesDir = options.baseTemplatesDir;
     
     return function (files, metalsmith, done) {
         var jadeTemplatePromises = [];
