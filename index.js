@@ -8,8 +8,8 @@ var jade = require('jade'),
 function jadeTemplater (options) {
     var fs_readFile = Q.denodeify(fs.readFile);
     
-    // TODO: This should have a default value.
-    var baseTemplatesDir = options.baseTemplatesDir;
+    var baseTemplatesDir = 
+        options.baseTemplatesDir || getDefaultTemplateDirectory();
     
     return function (files, metalsmith, done) {
         var jadeTemplatePromises = [];
@@ -23,7 +23,7 @@ function jadeTemplater (options) {
             }
             
             // Resolve the relative template file path to an absolute path.
-            var templateFilePath = path.resolve(baseTemplatesDir + '/' + file.template);
+            var templateFilePath = path.join(baseTemplatesDir, file.template);
             
             var templateReadPromise = fs_readFile(templateFilePath, 'utf8');
             templateReadPromise
@@ -63,6 +63,12 @@ function jadeTemplater (options) {
                 console.error(error.toString());
             });
     };
+}
+
+function getDefaultTemplateDirectory () {
+    var mainModuleDir = path.dirname(process.mainModule.filename);
+    
+    return mainModuleDir + path.sep + 'templates';
 }
 
 module.exports = jadeTemplater;
