@@ -10,6 +10,7 @@ function jadeTemplater (options) {
     
     var baseTemplatesDir = 
         options.baseTemplatesDir || getDefaultTemplateDirectory();
+    var fileDataKey = options.fileDataKey || 'data';
     
     return function (files, metalsmith, done) {
         var jadeTemplatePromises = [];
@@ -39,7 +40,7 @@ function jadeTemplater (options) {
                     var templateFn = jade.compile(templateContents, jadeCompileOptions);
                     
                     var locals = Object.create(null);
-                    locals.data = file;
+                    locals[fileDataKey] = file;
                     
                     var htmlOutput = templateFn(locals);
                     
