@@ -1,6 +1,6 @@
 {
   "name": "metalsmith-jade-templater",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "description": "Metalsmith plugin for using Jade as a template wrapper around post content.",
   "main": "index.js",
   "scripts": {

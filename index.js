@@ -7,55 +7,59 @@ var jade = require('jade'),
 
 function jadeTemplater (options) {
     var fs_readFile = Q.denodeify(fs.readFile);
-    
-    var baseTemplatesDir = 
+
+    var baseTemplatesDir =
         options.baseTemplatesDir || getDefaultTemplateDirectory();
-    var fileDataKey = options.fileDataKey || 'data';
-    
+    var fileDataKey = options.fileDataKey || false;
+
     return function (files, metalsmith, done) {
         var jadeTemplatePromises = [];
-        
+
         Object.keys(files).forEach(function (filename) {
             var file = files[filename];
-            
+
             if (!file.template) {
                 // No template file specified, do nothing.
                 return;
             }
-            
+
             // Resolve the relative template file path to an absolute path.
             var templateFilePath = path.join(baseTemplatesDir, file.template);
-            
+
             var templateReadPromise = fs_readFile(templateFilePath, 'utf8');
             templateReadPromise
                 .then(function (fileBuffer) {
                     var templateContents = fileBuffer.toString();
-                    
+
                     var jadeCompileOptions = {
-                        pretty: true, 
-                        filename: filename, 
+                        pretty: true,
+                        filename: filename,
                         basedir: baseTemplatesDir
                     };
-                    
+
                     var templateFn = jade.compile(templateContents, jadeCompileOptions);
-                    
+
                     var locals = Object.create(null);
-                    locals[fileDataKey] = file;
-                    
+                    if (fileDataKey) {
+                      locals[fileDataKey] = file;
+                    } else {
+                      locals = file;
+                    }
+
                     var htmlOutput = templateFn(locals);
-                    
+
                     file.contents = new Buffer(htmlOutput);
                 })
                 .catch(function (error) {
                     // TODO: How should this error be handled?
                     console.error(error.toString());
-                    
+
                     throw error;
                 });
-            
+
             jadeTemplatePromises.push(templateReadPromise);
         });
-        
+
         Q.all(jadeTemplatePromises)
             .then(function (result) {
                 done();
@@ -68,7 +72,7 @@ function jadeTemplater (options) {
 
 function getDefaultTemplateDirectory () {
     var mainModuleDir = path.dirname(process.mainModule.filename);
-    
+
     return mainModuleDir + path.sep + 'templates';
 }
 
